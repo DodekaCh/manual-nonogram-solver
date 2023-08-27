@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Manual Nonogram Solver</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script src="https://handsomeone.github.io/Nonogram/nonogram.min.js"></script>
+</head>
+
+<body>
+    <div style="margin: auto; width: fit-content;">
+        <h1>Import your nonogram by clue, and solve it manually!</h1>
+        Powered by: <a href="url">https://github.com/HandsomeOne/Nonogram</a><br>
+        This repo: <a href="url">https://github.com/DodekaCh/manual-nonogram-solver</a>
+    </div>
+    <div style="margin: auto; width: fit-content;">
+        <canvas id="gameCanvas" width="1024"></canvas>
+    </div>
+    <div style="margin: auto; width: fit-content;">
+        <form id="inputForm">
+            Input the clues:
+            <div style="display: flex;">
+                <div>
+                    <label for="rows">Rows:</label><br>
+                    <textarea id="rows" name="rows" cols="40" rows="25">
+1 2
+
+1 1</textarea><br>
+                </div>
+                <div style="width: 20pt;"></div>
+                <div>
+                    <label for="columns">Columns:</label><br>
+                    <textarea id="columns" name="columns" cols="40" rows="25">
+1 1
+
+1 1
+1</textarea><br>
+                </div>
+            </div>
+            <div id="invalidInputErrorMessage" hidden>Invalid clue: the row and column sums did not match. Maybe you
+                made a typo? </div>
+            <div style="display: flex; justify-content: flex-end;">
+                <input type="submit" value="Create">
+            </div>
+        </form>
+    </div>
+    <script>
+
+        function create_editor(rows, columns) {
+            let rows_parsed = parse_clue(rows)
+            let columns_parsed = parse_clue(columns)
+
+            let sum = (accumulator, currentValue) => accumulator + currentValue
+            if (rows_parsed.map(row => row.reduce(sum, 0)).reduce(sum, 0) === columns_parsed.map(column => column.reduce(sum, 0)).reduce(sum, 0)) {
+                document.getElementById("invalidInputErrorMessage").setAttribute("hidden", "hidden")
+                new nonogram.Game(rows_parsed, columns_parsed, 'gameCanvas')
+            } else {
+                console.error("Invalid clue: the row and column sums did not match. Maybe you made a typo?")
+                document.getElementById("invalidInputErrorMessage").removeAttribute("hidden")
+            }
+        }
+
+        function parse_clue(row_or_column_clue) {
+            return row_or_column_clue.toString().split("\n").map(row_or_column => row_or_column.split(" ").filter(number_string => number_string != "").map(number => parseInt(number)))
+        }
+
+        document.getElementById("inputForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            let data = new FormData(e.target);
+            let rows = data.get("rows");
+            let columns = data.get("columns");
+
+            create_editor(rows, columns)
+        })
+        // Create a game that matches the default values
+        new nonogram.Game([[1, 2], [], [1, 1]], [[1, 1], [], [1, 1], [1]], 'gameCanvas')
+    </script>
+</body>
+
+</html>
